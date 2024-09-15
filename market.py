@@ -20,7 +20,7 @@ total_target_market = round(households_target_market + commercial_target_market)
 # Input parameters
 st.sidebar.header("Input Parameters")
 
-choice = st.sidebar.radio("Select Option", ["Market", "Revenue", "Costs", "Profit"])
+choice = st.sidebar.radio("Select Option", ["Market", "Revenue", "Costs", "Profit", "Break Even Analysis", "Sensitivity Analysis"])
 
 # Market Parameters
 if choice == "Market":
@@ -89,6 +89,8 @@ if choice == "Market":
     st.session_state.households_target_market = households_target_market
     st.session_state.commercial_target_market = commercial_target_market
     st.session_state.total_market = total_market
+    
+    
     
 # Revenue Parameters
 
@@ -190,7 +192,6 @@ elif choice == "Costs":
     
     credit_card_transaction_cost_percentage = st.session_state.credit_card_transaction_cost_percentage
 
-    
     st.sidebar.subheader("Cost Parameters")
     
     # SEPA Fee per Transaction
@@ -277,7 +278,6 @@ elif choice == "Costs":
     )
     st.sidebar.markdown("Miscellaneous Costs (€): Additional costs that may not fall into other specific categories.")
 
-
     # Annual Salary per Founder
     annual_salary_founders = st.sidebar.number_input("**Annual Salary per Founder (€)**", value=50000)
     st.sidebar.markdown("Annual Salary per Founder (€): The annual salary for each founder of the startup.")
@@ -328,12 +328,12 @@ elif choice == "Costs":
     screening_cost = screening_cost * total_target_market * st.session_state.screening_percentage
     
     # Variable Cost per Client
-    variable_cost_per_client = (heroku_cost + infrastructure_it_cost + customer_support_cost + marketing_sales_cost + total_insurance_cost + total_sepa_cost + total_credit_card_cost + screening_cost) / total_target_market
+    monthly_variable_cost_per_client = (heroku_cost + infrastructure_it_cost + customer_support_cost + marketing_sales_cost + total_insurance_cost + total_sepa_cost + total_credit_card_cost + screening_cost) / total_target_market
 
     # Total Monthly Costs
-    total_fixed_costs = office_rent + utilities + insurance_costs + legal_accounting_costs + miscellaneous_costs + salary_founders + salary_additional_staff
-    total_variable_costs = variable_cost_per_client * total_target_market
-    total_costs = total_fixed_costs + total_variable_costs
+    monthly_total_fixed_costs = office_rent + utilities + insurance_costs + legal_accounting_costs + miscellaneous_costs + salary_founders + salary_additional_staff
+    monthly_total_variable_costs = monthly_variable_cost_per_client * total_target_market
+    monthly_total_costs = monthly_total_fixed_costs + monthly_total_variable_costs
     
     # Save the input parameters in session state
     st.session_state.sepa_cost = sepa_cost
@@ -353,10 +353,10 @@ elif choice == "Costs":
     st.session_state.number_of_founders = number_of_founders
     st.session_state.annual_salary_additional_staff = annual_salary_additional_staff
     st.session_state.number_of_additional_staff = number_of_additional_staff
-    st.session_state.total_fixed_costs = total_fixed_costs
-    st.session_state.total_variable_costs = total_variable_costs
-    st.session_state.total_costs = total_costs
-    st.session_state.variable_cost_per_client = variable_cost_per_client
+    st.session_state.total_fixed_costs = monthly_total_fixed_costs
+    st.session_state.total_variable_costs = monthly_total_variable_costs
+    st.session_state.total_costs = monthly_total_costs
+    st.session_state.variable_cost_per_client = monthly_variable_cost_per_client
     st.session_state.total_sepa_cost = total_sepa_cost
     st.session_state.total_credit_card_cost = total_credit_card_cost
     st.session_state.total_insurance_cost = total_insurance_cost
@@ -372,14 +372,14 @@ elif choice == "Costs":
     
     st.header("Cost Analysis")
     
-    st.write(f"**Total Monthly Fixed Costs:** €{round(total_fixed_costs):,}")
-    st.write(f"**Total Monthly Variable Costs:** €{round(total_variable_costs):,}")
+    st.write(f"**Total Monthly Fixed Costs:** €{round(monthly_total_fixed_costs):,}")
+    st.write(f"**Total Monthly Variable Costs:** €{round(monthly_total_variable_costs):,}")
     
-    st.write(f"**Total Monthly Costs:** €{round(total_costs):,}")
+    st.write(f"**Total Monthly Costs:** €{round(monthly_total_costs):,}")
     
     # Bar chart for costs, title = "Monthly Costs"
     costs = ["Fixed Costs", "Variable Costs"]
-    amounts = [total_fixed_costs, total_variable_costs]
+    amounts = [monthly_total_fixed_costs, monthly_total_variable_costs]
     fig, ax = plt.subplots()
     colors = ['#ff9999','#66b3ff']
     ax.bar(costs, amounts, color=colors, alpha=0.7)
@@ -389,7 +389,7 @@ elif choice == "Costs":
     
     # Pie chart for costs
     labels = ["Fixed Costs", "Variable Costs"]
-    sizes = [total_fixed_costs, total_variable_costs]
+    sizes = [monthly_total_fixed_costs, monthly_total_variable_costs]
     fig, ax = plt.subplots()
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
     ax.axis('equal')
@@ -439,11 +439,11 @@ elif choice == "Profit":
     
     # Calculate Profit
     total_revenue = st.session_state.total_revenue
-    total_costs = st.session_state.total_costs
-    total_profit = total_revenue - total_costs
+    monthly_total_costs = st.session_state.total_costs
+    total_profit = total_revenue - monthly_total_costs
     variable_costs = st.session_state.total_variable_costs
     fixed_costs = st.session_state.total_fixed_costs
-    variable_cost_per_client = st.session_state.variable_cost_per_client
+    monthly_variable_cost_per_client = st.session_state.variable_cost_per_client
     total_subscription_revenue = st.session_state.total_subscription_revenue
     credit_card_total_revenue = st.session_state.credit_card_total_revenue
     screening_revenue = st.session_state.screening_revenue
@@ -472,27 +472,18 @@ elif choice == "Profit":
     
     # Display Profit
     st.write(f"**Total Monthly Revenue:** €{round(total_revenue):,}")
-    st.write(f"**Total Monthly Costs:** €{round(total_costs):,}")
+    st.write(f"**Total Monthly Costs:** €{round(monthly_total_costs):,}")
     st.write(f"**Total Monthly Profit:** €{round(total_profit):,}")
     st.write(f"**Profit Margin:** {round(profit_margin, 2)}%")
     
     # Bar chart for profit and costs
-    amounts = [total_revenue, total_costs, total_profit]
+    amounts = [total_revenue, monthly_total_costs, total_profit]
     labels = ["Total Revenue", "Total Costs", "Total Profit"]
     fig, ax = plt.subplots()
     colors = ['#ff9999','#66b3ff', '#99ff99']
     ax.bar(labels, amounts, color=colors, alpha=0.7)
     ax.set_title("Profit and Costs")
     plt.xticks(rotation=45, ha='right')
-    st.pyplot(fig)
-    
-    # Pie chart for profit and costs
-    labels = ["Total Revenue", "Total Costs", "Total Profit"]
-    sizes = [total_revenue, total_costs, total_profit]
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
-    ax.set_title("Profit and Costs")
     st.pyplot(fig)
     
     # Bar chart for revenue streams and their costs
@@ -529,10 +520,46 @@ elif choice == "Profit":
     # Show plot in Streamlit
     st.pyplot(fig)
     
-    # sunburst chart for revenue and costs by category by property type
-   
+elif choice == "Break Even Analysis":
     
-    # Create a DataFrame with the data
+    st.header("Break Even Analysis")
+    
+    total_customer = total_target_market
+    total_revenue_per_customer = st.session_state.total_revenue / total_customer
+    monthly_variable_cost_per_client = st.session_state.variable_cost_per_client
+    
+    # Calculate Break Even Point
+    
+    break_even_point = st.session_state.total_fixed_costs / (total_revenue_per_customer - monthly_variable_cost_per_client)
+        
+    st.write(f"**Total Monthly Fixed Costs:** €{round(st.session_state.total_fixed_costs):,}")
+    st.write(f"**Total Monthly Variable Costs per Client:** €{round(monthly_variable_cost_per_client):,}")
+    st.write(f"**Total Monthly Revenue per Client:** €{round(total_revenue_per_customer):,}")
+    st.write(f"**Break Even Point:** {round(break_even_point)} clients")
+    
+    # generate a line plot for break even analysis
+    Clients = np.arange(0, total_customer + 1)
+    Revenue = total_revenue_per_customer * Clients
+    Fixed_Costs = np.full_like(Clients, st.session_state.total_fixed_costs)
+    Variable_Costs = monthly_variable_cost_per_client * Clients
+    Total_Costs = Fixed_Costs + Variable_Costs
+ 
+    fig, ax = plt.subplots()
+    ax.plot(Clients, Revenue, label='Revenue', color='blue')
+    ax.plot(Clients, Fixed_Costs, label='Fixed Costs', color='red')
+    ax.plot(Clients, Total_Costs, label='Total_Costs', color='green')
+    ax.set_xlabel('Number of Clients')
+    ax.set_ylabel('Amount (€)')
+    ax.set_title('Break Even Analysis')
+    ax.legend()
+    st.pyplot(fig)
+    
+
+    
+    
+    
+    
+    
         
         
 
