@@ -16,12 +16,12 @@ total_market = rental_households + commercial_properties
 households_target_market = rental_households * 0.05
 commercial_target_market = commercial_properties * 0.05
 total_target_market = round(households_target_market + commercial_target_market)
+projection_period = 5
 
 # Input parameters
 st.sidebar.header("Input Parameters")
 
-choice = st.sidebar.radio("Select Option", ["Market", "Revenue", "Costs", "Profit", "Break Even Analysis", "Sensitivity Analysis"])
-
+choice = st.sidebar.radio("Select Option", ["Market", "Revenue", "Costs", "Profit", "Break Even Analysis", "Summary"])
 # Market Parameters
 if choice == "Market":
     st.sidebar.markdown("### Market Parameters")
@@ -33,8 +33,15 @@ if choice == "Market":
         st.session_state.monthly_commercial_rent = None
 
     # Target Market Size
-    total_target_market = st.sidebar.number_input("**Target Market Size**", value=round(total_target_market))
-    st.sidebar.markdown("Target Market Size: The estimated number of potential clients in the target market.")
+    # percentage of the total market that is the target market
+    households_target_market = st.sidebar.number_input("**Target Market of Residential Properties (%)**", value=5) / 100
+    st.sidebar.markdown("Target Market of Residential Properties (%): The percentage of residential properties in the target market.")
+    
+    commercial_target_market = st.sidebar.number_input("**Target Market of Commercial Properties (%)**", value=5) / 100
+    st.sidebar.markdown("Target Market of Commercial Properties (%): The percentage of commercial properties in the target market.")
+    
+    # total_target_market = st.sidebar.number_input("**Target Market Size**", value=round(total_target_market))
+    # st.sidebar.markdown("Target Market Size: The estimated number of potential clients in the target market.")
 
     # Estimated Monthly Rent per Residencial Property
     monthly_residencial_rent = st.sidebar.number_input("**Monthly Rent per Client (€)**", value=600)
@@ -44,6 +51,8 @@ if choice == "Market":
     monthly_commercial_rent = st.sidebar.number_input("**Monthly Rent per Commercial Property (€)**", value=1000)
     st.sidebar.markdown("Monthly Rent per Commercial Property (€): The average rent paid by each commercial client per month.")
     
+    total_target_market = households_target_market * rental_households + commercial_target_market * commercial_properties
+    
     st.header("Market Analysis")
     
     st.write("**Population of Greece:** 10,423,054")
@@ -51,6 +60,14 @@ if choice == "Market":
     st.write("**Total households:** 4,332,447")
     
     st.write("**Rental households:** 1,299,176")
+    
+    st.write("**Commercial properties:** 385,000")
+    
+    st.write(f"**Target Residential Market Size:** {round(households_target_market * rental_households):,}")
+    
+    st.write(f"**Target Commercial Market Size:** {round(commercial_target_market * commercial_properties):,}")
+    
+    st.write(f"**Total Target Market Size:** {round(total_target_market):,}")
     
     ### Source
     st.write("""Data on the number of households is sourced from the [Hellenic Statistical Authority](https://www.statistics.gr/el/2021-census-res-pop-results) (2021 Census).
@@ -76,7 +93,7 @@ if choice == "Market":
     st.pyplot(fig)
     
     labels = ["Residential", "Commercial"]
-    sizes = [households_target_market, commercial_target_market]
+    sizes = [households_target_market * rental_households , commercial_target_market * commercial_properties]
     fig, ax = plt.subplots()
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
     ax.axis('equal')
@@ -99,8 +116,8 @@ if choice == "Revenue":
     st.sidebar.subheader("Revenue Parameters")
         
     # Monthly Fee Rate
-    subscription = st.sidebar.number_input("**Monthly charge rate (%)**", value=4) / 100
-    st.sidebar.markdown("Monthly charge_rate (%): The percentage of the rent that is charged as a fee to the client.")
+    subscription = st.sidebar.number_input("**Monthly charge rate per property (%)**", value=4) / 100
+    st.sidebar.markdown("Monthly charge_rate per property (%): The percentage of the rent that is charged as a fee to the client.")
 
     # Credit Card Fee Percentage
     credit_card_charge_percentage = st.sidebar.number_input("**Credit Card Fee (%)**", value=1.6) / 100
@@ -131,7 +148,7 @@ if choice == "Revenue":
     credit_card_total_revenue = credit_card_residencial_revenue + credit_card_commercial_revenue
     
     # Tenant Screening revenue
-    screening_revenue = total_target_market * screening_percentage * screening_charges
+    screening_revenue = (total_target_market * screening_percentage * screening_charges) / ( 12 * projection_period)
     
     # Total Revenue
     total_revenue = total_subscription_revenue + credit_card_total_revenue + screening_revenue
@@ -155,25 +172,25 @@ if choice == "Revenue":
     
     st.header("Revenue Analysis")
     
-    st.write(f"**Subscription rate (%):** {subscription * 100}")
-    st.write(f"**Credit Card Fee (%):** {credit_card_charge_percentage * 100}")
-    st.write(f"**Percentage of Credit Card Transactions (%):** {credit_card_transaction_cost_percentage * 100}")
-    st.write(f"**Tenant Screening charge (€):** {screening_charges}")
-    st.write(f"**Percentage of tenants screened (%):** {screening_percentage * 100}")
-    st.write(f"**Monthly Rent per Recidencial Property (€):** {st.session_state.monthly_residencial_rent}")
-    st.write(f"**Monthly Rent per Commercial Property (€):** {st.session_state.monthly_commercial_rent}")
-    st.write(f"**Target Market Size:** {total_target_market:,}")
+    # st.write(f"**Subscription rate (%):** {subscription * 100}")
+    # st.write(f"**Credit Card Fee (%):** {credit_card_charge_percentage * 100}")
+    # st.write(f"**Percentage of Credit Card Transactions (%):** {credit_card_transaction_cost_percentage * 100}")
+    # st.write(f"**Tenant Screening charge (€):** {screening_charges}")
+    # st.write(f"**Percentage of tenants screened (%):** {screening_percentage * 100}")
+    # st.write(f"**Monthly Rent per Recidencial Property (€):** {st.session_state.monthly_residencial_rent}")
+    # st.write(f"**Monthly Rent per Commercial Property (€):** {st.session_state.monthly_commercial_rent}")
+    # st.write(f"**Target Market Size:** {total_target_market:,}")
     
-    st.write(f"**Monthly Subscription Residential Revenue:** €{round(households_target_market * st.session_state.monthly_residencial_rent * subscription):,}")
-    st.write(f"**Monthly Subscription Commercial Revenue:** €{round(commercial_target_market * st.session_state.monthly_commercial_rent * subscription):,}")
-    st.write(f"**Total Subscription Revenue:** €{round(total_target_market * (st.session_state.monthly_residencial_rent + st.session_state.monthly_commercial_rent) * subscription):,}")
+    st.write(f"**Monthly PMR Charge Residential Revenue:** €{round(households_target_market * st.session_state.monthly_residencial_rent * subscription):,}")
+    st.write(f"**Monthly PMR Charge Commercial Revenue:** €{round(commercial_target_market * st.session_state.monthly_commercial_rent * subscription):,}")
+    st.write(f"**Total PMR Revenue:** €{round(total_target_market * (st.session_state.monthly_residencial_rent + st.session_state.monthly_commercial_rent) * subscription):,}")
     st.write(f"**Total Monthly Credit Card Revenue:** €{round(credit_card_total_revenue):,}")
     st.write(f"**Total Monthly Tenant Screening Revenue:** €{round(screening_revenue):,}")
     
     st.write(f"**Total Monthly Revenue:** €{round(total_revenue):,}")
     
     # Bar chart for revenue sources 
-    revenue_sources = ["Subscription", "Credit Card", "Tenant Screening"]
+    revenue_sources = ["PMR", "Credit Card", "Tenant Screening"]
     revenue = [total_subscription_revenue, credit_card_total_revenue, screening_revenue]
     fig, ax = plt.subplots()
     colors = ['#ff9999','#66b3ff', '#99ff99']
@@ -181,10 +198,10 @@ if choice == "Revenue":
     st.pyplot(fig)
     
     # Pie chart for revenue sources
-    labels = ["Subscription", "Credit Card", "Tenant Screening"]
+    labels = ["PMR", "Credit Card", "Tenant Screening"]
     sizes = [total_subscription_revenue, credit_card_total_revenue, screening_revenue]
     fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', counterclock=False, pctdistance=0.85)
     ax.axis('equal')
     st.pyplot(fig)
     
@@ -325,8 +342,7 @@ elif choice == "Costs":
     credit_card_residencial_cost = credit_card_cost_percentage * st.session_state.monthly_residencial_rent * credit_card_transaction_cost_percentage * households_target_market
     credit_card_commercial_cost = credit_card_cost_percentage * st.session_state.monthly_commercial_rent * credit_card_transaction_cost_percentage * commercial_target_market
     total_credit_card_cost = credit_card_residencial_cost + credit_card_commercial_cost
-    screening_cost = screening_cost * total_target_market * st.session_state.screening_percentage
-    
+    screening_cost = (screening_cost * total_target_market * st.session_state.screening_percentage) / (12 * projection_period)    
     # Variable Cost per Client
     monthly_variable_cost_per_client = (heroku_cost + infrastructure_it_cost + customer_support_cost + marketing_sales_cost + total_insurance_cost + total_sepa_cost + total_credit_card_cost + screening_cost) / total_target_market
 
@@ -376,6 +392,15 @@ elif choice == "Costs":
     st.write(f"**Total Monthly Variable Costs:** €{round(monthly_total_variable_costs):,}")
     
     st.write(f"**Total Monthly Costs:** €{round(monthly_total_costs):,}")
+    
+    st.write(f"**Monthly Variable Cost per Client:** €{round(monthly_variable_cost_per_client):,}")
+    st.write(f"**Total Monthly SEPA Cost:** €{round(total_sepa_cost):,}")
+    st.write(f"**Total Monthly Credit Card Cost:** €{round(total_credit_card_cost):,}")
+    st.write(f"**Total Monthly Insurance Cost:** €{round(total_insurance_cost):,}")
+    st.write(f"**Total Monthly Screening Cost:** €{round(screening_cost):,}")
+    
+    st.write(f"**residencial Insurance Cost:** €{round(residencial_insurance_cost):,}")
+    st.write(f"**commercial Insurance Cost:** €{round(commercial_insurance_cost):,}")
     
     # Bar chart for costs, title = "Monthly Costs"
     costs = ["Fixed Costs", "Variable Costs"]
@@ -532,16 +557,17 @@ elif choice == "Break Even Analysis":
     
     break_even_point = st.session_state.total_fixed_costs / (total_revenue_per_customer - monthly_variable_cost_per_client)
         
-    st.write(f"**Total Monthly Fixed Costs:** €{round(st.session_state.total_fixed_costs):,}")
-    st.write(f"**Total Monthly Variable Costs per Client:** €{round(monthly_variable_cost_per_client):,}")
-    st.write(f"**Total Monthly Revenue per Client:** €{round(total_revenue_per_customer):,}")
-    st.write(f"**Break Even Point:** {round(break_even_point)} clients")
+    st.write(f"**Total Annual Fixed Costs:** €{round(st.session_state.total_fixed_costs*12):,}")
+    st.write(f"**Total Annual Variable Costs:** €{round(monthly_variable_cost_per_client*total_customer*12):,}")
+    st.write(f"**Total Annual Variable Costs per Client:** €{round(monthly_variable_cost_per_client*12):,}")
+    st.write(f"**Total Annual Revenue per Client:** €{round(total_revenue_per_customer*12):,}")
+    st.write(f"**Break Even Point:** {round(break_even_point):,} clients")
     
     # generate a line plot for break even analysis
     Clients = np.arange(0, total_customer + 1)
-    Revenue = total_revenue_per_customer * Clients
-    Fixed_Costs = np.full_like(Clients, st.session_state.total_fixed_costs)
-    Variable_Costs = monthly_variable_cost_per_client * Clients
+    Revenue = total_revenue_per_customer * Clients*12
+    Fixed_Costs = np.full_like(Clients, st.session_state.total_fixed_costs)*12
+    Variable_Costs = monthly_variable_cost_per_client * Clients*12
     Total_Costs = Fixed_Costs + Variable_Costs
  
     fig, ax = plt.subplots()
@@ -550,9 +576,34 @@ elif choice == "Break Even Analysis":
     ax.plot(Clients, Total_Costs, label='Total_Costs', color='green')
     ax.set_xlabel('Number of Clients')
     ax.set_ylabel('Amount (€)')
+    ax.set_xlim(0, 10000)
+    ax.set_ylim(0, 2000000)
     ax.set_title('Break Even Analysis')
     ax.legend()
     st.pyplot(fig)
+    
+elif choice == "Summary":
+    
+    # summarize what the company is doing, how it is doing it, and why it is doing it
+    st.header("Summary")
+    
+    # Our customers
+    st.write("Our customers are residential and commercial landlords in Greece.")
+    
+    # more specific about the product
+    st.write("We offer a platform that allows landlords to manage their rental properties more efficiently.")
+    
+    # how we make money
+    st.write("We charge a monthly fee to landlords for using our platform.")
+    # more specific about the revenue model
+    st.write("We also charge a fee for credit card transactions and tenant screening services.")
+    
+    # how much we charge
+    st.write("Our monthly fee is 4% of the rent per property.")
+    st.write("We charge the tenants a 1.6% fee for credit card transactions.")
+    st.write("We charge tenants €5 for tenant screening services.")
+    
+    
     
 
     
