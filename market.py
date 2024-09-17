@@ -6,24 +6,64 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 # Title of the app
-st.title("Startup Financial Analysis")
+st.title("Presentation: PayMyRent.gr")
 
 population = 10423054
 total_households = 4332447
 rental_households = 1299176
 commercial_properties = 385000
 total_market = rental_households + commercial_properties
-households_target_market = rental_households * 0.05
-commercial_target_market = commercial_properties * 0.05
-total_target_market = round(households_target_market + commercial_target_market)
+
 projection_period = 5
 
 # Input parameters
 st.sidebar.header("Input Parameters")
 
-choice = st.sidebar.radio("Select Option", ["Market", "Revenue", "Costs", "Profit", "Break Even Analysis", "Summary"])
+choice = st.sidebar.radio("Select Option", ["Presentation", "Market", "Revenue", "Costs", "Profit", "Break Even Analysis"])
+
+if choice == "Presentation":
+    
+    # Our customers
+    st.write("""
+    ### Introduction
+    **PayMyRent.gr** is a comprehensive platform designed to streamline the rental process for property owners and tenants in Greece. It provides an all-in-one solution for managing rental payments, tenant screening, and insurance coverage, leveraging technology to enhance efficiency and security in the rental market.
+
+    ### Key Features
+    
+    1. **Rental Payment Management**
+    - ***Automated Payments:*** **PayMyRent.gr** facilitates automatic payment processing for both residential and commercial properties. 
+    - ***Monthly Billing:*** Property owners are billed monthly for rental payments, making it easier to manage finances and track transactions.
+    2. **Tenant Screening**
+    - ***Credit Checks:*** The platform offers comprehensive tenant screening services, including credit checks to assess the reliability of potential tenants.
+    - ***Risk Mitigation:*** By verifying tenant credentials, property owners can reduce the risk of non-payment and ensure they are renting to responsible individuals.
+    3. **Insurance Coverage**
+     **PayMyRent.gr** includes insurance coverage that protects against:
+    - ***Unpaid Rent:*** Covers up to three months of unpaid rent.
+    - ***Legal Fees:*** Covers legal costs associated with recovering unpaid rent.
+    - ***Utility Bills:*** Addresses unpaid utility bills left behind by tenants.
+    
+    ### Impact and Benefits
+    - **Streamlined Operations:** Simplifies payment processing and tenant management.
+    - **Enhanced Security:** Provides insurance and screening to protect property owners.
+    - **Financial Planning:** Offers detailed cost tracking and analysis for financial planning.
+    
+    ### Why PayMyRent.gr?
+    **PayMyRent.gr** is committed to providing a seamless rental experience for property owners and tenants, ensuring financial security and peace of mind in the rental market.
+    """)
+    
+    # Market Opportunity
+    st.write("""
+    ### Market Opportunity
+    **Greece Rental Market Overview**
+    - **Population:** 10,423,054
+    - **Total Households:** 4,332,447
+    - **Rental Households:** 1,299,176
+    - **Commercial Properties:** 385,000
+    """)
+
+    
 # Market Parameters
-if choice == "Market":
+elif choice == "Market":
     st.sidebar.markdown("### Market Parameters")
     
     # Initialize session state variables if not already set
@@ -34,14 +74,11 @@ if choice == "Market":
 
     # Target Market Size
     # percentage of the total market that is the target market
-    households_target_market = st.sidebar.number_input("**Target Market of Residential Properties (%)**", value=5) / 100
+    households_target_market_percentage = st.sidebar.number_input("**Target Market of Residential Properties (%)**", value=3) / 100
     st.sidebar.markdown("Target Market of Residential Properties (%): The percentage of residential properties in the target market.")
     
-    commercial_target_market = st.sidebar.number_input("**Target Market of Commercial Properties (%)**", value=5) / 100
+    commercial_target_market_percentage  = st.sidebar.number_input("**Target Market of Commercial Properties (%)**", value=3) / 100
     st.sidebar.markdown("Target Market of Commercial Properties (%): The percentage of commercial properties in the target market.")
-    
-    # total_target_market = st.sidebar.number_input("**Target Market Size**", value=round(total_target_market))
-    # st.sidebar.markdown("Target Market Size: The estimated number of potential clients in the target market.")
 
     # Estimated Monthly Rent per Residencial Property
     monthly_residencial_rent = st.sidebar.number_input("**Monthly Rent per Client (€)**", value=600)
@@ -51,7 +88,10 @@ if choice == "Market":
     monthly_commercial_rent = st.sidebar.number_input("**Monthly Rent per Commercial Property (€)**", value=1000)
     st.sidebar.markdown("Monthly Rent per Commercial Property (€): The average rent paid by each commercial client per month.")
     
-    total_target_market = households_target_market * rental_households + commercial_target_market * commercial_properties
+    households_target_market = rental_households * households_target_market_percentage
+    commercial_target_market = commercial_properties * commercial_target_market_percentage
+    
+    total_target_market =  round(households_target_market + commercial_target_market)
     
     st.header("Market Analysis")
     
@@ -63,9 +103,9 @@ if choice == "Market":
     
     st.write("**Commercial properties:** 385,000")
     
-    st.write(f"**Target Residential Market Size:** {round(households_target_market * rental_households):,}")
+    st.write(f"**Target Residential Market Size:** {round(households_target_market):,}")
     
-    st.write(f"**Target Commercial Market Size:** {round(commercial_target_market * commercial_properties):,}")
+    st.write(f"**Target Commercial Market Size:** {round(commercial_target_market):,}")
     
     st.write(f"**Total Target Market Size:** {round(total_target_market):,}")
     
@@ -78,7 +118,7 @@ if choice == "Market":
              Percentage of businesses renting properties: Based on trends across European countries, around 50-60% of businesses rent their commercial spaces.
              Using a midpoint estimate of 55%, the number of rental commercial properties in Greece can be estimated as: 385,000""")
     
-    st.write(f"As **Target Market Size** we estimate 5% of the total rental market: {total_target_market}")
+    st.write(f"As **Target Market Size** we estimate {households_target_market} of the residential market and {commercial_target_market} of the commercial market in total {total_target_market} of the total rental market")
     st.write(f"**Monthly Rent per Client:** €{monthly_residencial_rent}")
     st.write(f"**Monthly Rent per Commercial Property:** €{monthly_commercial_rent}")
     
@@ -106,17 +146,24 @@ if choice == "Market":
     st.session_state.households_target_market = households_target_market
     st.session_state.commercial_target_market = commercial_target_market
     st.session_state.total_market = total_market
+    st.session_state.households_target_market_percentage = households_target_market_percentage
+    st.session_state.commercial_target_market_percentage = commercial_target_market_percentage
     
     
-    
+
+
 # Revenue Parameters
 
 if choice == "Revenue":
     
+    households_target_market = st.session_state.households_target_market
+    commercial_target_market = st.session_state.commercial_target_market
+    total_target_market = st.session_state.total_target_market
+    
     st.sidebar.subheader("Revenue Parameters")
         
     # Monthly Fee Rate
-    subscription = st.sidebar.number_input("**Monthly charge rate per property (%)**", value=4) / 100
+    pmr_charge = st.sidebar.number_input("**Monthly charge rate per property (%)**", value=3) / 100
     st.sidebar.markdown("Monthly charge_rate per property (%): The percentage of the rent that is charged as a fee to the client.")
 
     # Credit Card Fee Percentage
@@ -138,8 +185,8 @@ if choice == "Revenue":
     # Revenue Calculation
     
     # Subscpription revenue
-    residencial_revenue = households_target_market * st.session_state.monthly_residencial_rent * subscription
-    commercial_revenue = commercial_target_market * st.session_state.monthly_commercial_rent * subscription
+    residencial_revenue = households_target_market * st.session_state.monthly_residencial_rent * pmr_charge
+    commercial_revenue = commercial_target_market * st.session_state.monthly_commercial_rent * pmr_charge
     total_subscription_revenue = residencial_revenue + commercial_revenue
     
     # Credit Card revenue
@@ -154,7 +201,7 @@ if choice == "Revenue":
     total_revenue = total_subscription_revenue + credit_card_total_revenue + screening_revenue
     
     # Save the input parameters in session state
-    st.session_state.charge_rate = subscription
+    st.session_state.charge_rate = pmr_charge
     st.session_state.credit_card_charge_percentage = credit_card_charge_percentage
     st.session_state.credit_card_transaction_cost_percentage = credit_card_transaction_cost_percentage
     st.session_state.screening_charges = screening_charges
@@ -172,18 +219,9 @@ if choice == "Revenue":
     
     st.header("Revenue Analysis")
     
-    # st.write(f"**Subscription rate (%):** {subscription * 100}")
-    # st.write(f"**Credit Card Fee (%):** {credit_card_charge_percentage * 100}")
-    # st.write(f"**Percentage of Credit Card Transactions (%):** {credit_card_transaction_cost_percentage * 100}")
-    # st.write(f"**Tenant Screening charge (€):** {screening_charges}")
-    # st.write(f"**Percentage of tenants screened (%):** {screening_percentage * 100}")
-    # st.write(f"**Monthly Rent per Recidencial Property (€):** {st.session_state.monthly_residencial_rent}")
-    # st.write(f"**Monthly Rent per Commercial Property (€):** {st.session_state.monthly_commercial_rent}")
-    # st.write(f"**Target Market Size:** {total_target_market:,}")
-    
-    st.write(f"**Monthly PMR Charge Residential Revenue:** €{round(households_target_market * st.session_state.monthly_residencial_rent * subscription):,}")
-    st.write(f"**Monthly PMR Charge Commercial Revenue:** €{round(commercial_target_market * st.session_state.monthly_commercial_rent * subscription):,}")
-    st.write(f"**Total PMR Revenue:** €{round(total_target_market * (st.session_state.monthly_residencial_rent + st.session_state.monthly_commercial_rent) * subscription):,}")
+    st.write(f"**Monthly PMR Charge Residential Revenue:** €{round(households_target_market * st.session_state.monthly_residencial_rent * pmr_charge):,}")
+    st.write(f"**Monthly PMR Charge Commercial Revenue:** €{round(commercial_target_market * st.session_state.monthly_commercial_rent * pmr_charge):,}")
+    st.write(f"**Total PMR Revenue:** €{round(total_target_market * (st.session_state.monthly_residencial_rent + st.session_state.monthly_commercial_rent) * pmr_charge):,}")
     st.write(f"**Total Monthly Credit Card Revenue:** €{round(credit_card_total_revenue):,}")
     st.write(f"**Total Monthly Tenant Screening Revenue:** €{round(screening_revenue):,}")
     
@@ -207,17 +245,20 @@ if choice == "Revenue":
     
 elif choice == "Costs":
     
+    households_target_market = st.session_state.households_target_market
+    commercial_target_market = st.session_state.commercial_target_market
+    total_target_market = st.session_state.total_target_market
+    
     credit_card_transaction_cost_percentage = st.session_state.credit_card_transaction_cost_percentage
+    
+    sepa_fixed_costs = 2 + 0.35
+    sepa_variable_costs = 0.6 / 100
+    credit_card_cost_percentage = 1.4 / 100
+    
+    def sepa_cost_per_transaction(fixed_costs, variable_costs, transaction_amount):
+        return fixed_costs + variable_costs * transaction_amount
 
     st.sidebar.subheader("Cost Parameters")
-    
-    # SEPA Fee per Transaction
-    sepa_cost = st.sidebar.number_input("**SEPA cost per Transaction (€)**", value=3.0)
-    st.sidebar.markdown("SEPA cost per Transaction (€): The cost associated with processing each SEPA transaction.")
-    
-    # Credit Card Cost percentage per Transaction
-    credit_card_cost_percentage = st.sidebar.number_input("**Credit Card Cost (%)**", value=1.4) / 100
-    st.sidebar.markdown("Credit Card Cost (%): The percentage of the transaction cost for credit card transactions.")
     
     # Insurance Cost Percentage
     client_insurance_cost = st.sidebar.number_input("**Insurance Cost (%)**", value=0.7) / 100
@@ -336,8 +377,8 @@ elif choice == "Costs":
     residencial_insurance_cost = client_insurance_cost * st.session_state.monthly_residencial_rent * households_target_market
     commercial_insurance_cost = client_insurance_cost * st.session_state.monthly_commercial_rent * commercial_target_market
     total_insurance_cost = residencial_insurance_cost + commercial_insurance_cost
-    sepa_residencial_cost = sepa_cost * households_target_market
-    sepa_commercial_cost = sepa_cost * commercial_target_market
+    sepa_residencial_cost = sepa_cost_per_transaction(sepa_fixed_costs, sepa_variable_costs, st.session_state.monthly_residencial_rent) * households_target_market
+    sepa_commercial_cost = sepa_cost_per_transaction(sepa_fixed_costs, sepa_variable_costs, st.session_state.monthly_commercial_rent) * commercial_target_market
     total_sepa_cost = sepa_residencial_cost + sepa_commercial_cost
     credit_card_residencial_cost = credit_card_cost_percentage * st.session_state.monthly_residencial_rent * credit_card_transaction_cost_percentage * households_target_market
     credit_card_commercial_cost = credit_card_cost_percentage * st.session_state.monthly_commercial_rent * credit_card_transaction_cost_percentage * commercial_target_market
@@ -352,7 +393,9 @@ elif choice == "Costs":
     monthly_total_costs = monthly_total_fixed_costs + monthly_total_variable_costs
     
     # Save the input parameters in session state
-    st.session_state.sepa_cost = sepa_cost
+    st.session_state.sepa_residencial_cost = sepa_residencial_cost
+    st.session_state.sepa_commercial_cost = sepa_commercial_cost 
+    st.session_state.total_sepa_cost = total_sepa_cost
     st.session_state.credit_card_cost_percentage = credit_card_cost_percentage
     st.session_state.client_insurance_cost = client_insurance_cost
     st.session_state.screening_cost = screening_cost
@@ -387,6 +430,10 @@ elif choice == "Costs":
     st.session_state.screening_cost = screening_cost
     
     st.header("Cost Analysis")
+    
+    st.write(f"**SEPA Residencial Cost:** €{round(sepa_residencial_cost):,}")
+    st.write(f"**SEPA Commercial Cost:** €{round(sepa_commercial_cost):,}")
+    st.write(f"**Total SEPA Cost:** €{round(total_sepa_cost):,}")
     
     st.write(f"**Total Monthly Fixed Costs:** €{round(monthly_total_fixed_costs):,}")
     st.write(f"**Total Monthly Variable Costs:** €{round(monthly_total_variable_costs):,}")
@@ -547,6 +594,10 @@ elif choice == "Profit":
     
 elif choice == "Break Even Analysis":
     
+    households_target_market = st.session_state.households_target_market
+    commercial_target_market = st.session_state.commercial_target_market
+    total_target_market = st.session_state.total_target_market
+    
     st.header("Break Even Analysis")
     
     total_customer = total_target_market
@@ -582,26 +633,8 @@ elif choice == "Break Even Analysis":
     ax.legend()
     st.pyplot(fig)
     
-elif choice == "Summary":
+
     
-    # summarize what the company is doing, how it is doing it, and why it is doing it
-    st.header("Summary")
-    
-    # Our customers
-    st.write("Our customers are residential and commercial landlords in Greece.")
-    
-    # more specific about the product
-    st.write("We offer a platform that allows landlords to manage their rental properties more efficiently.")
-    
-    # how we make money
-    st.write("We charge a monthly fee to landlords for using our platform.")
-    # more specific about the revenue model
-    st.write("We also charge a fee for credit card transactions and tenant screening services.")
-    
-    # how much we charge
-    st.write("Our monthly fee is 4% of the rent per property.")
-    st.write("We charge the tenants a 1.6% fee for credit card transactions.")
-    st.write("We charge tenants €5 for tenant screening services.")
     
     
     
