@@ -30,13 +30,13 @@ if choice == "Presentation":
 
     ### Key Features
     
-    1. **Rental Payment Management**
+    1. #### Rental Payment Management
     - ***Automated Payments:*** **PayMyRent.gr** facilitates automatic payment processing for both residential and commercial properties. 
     - ***Monthly Billing:*** Property owners are billed monthly for rental payments, making it easier to manage finances and track transactions.
-    2. **Tenant Screening**
+    2. #### Tenant Screening Services
     - ***Credit Checks:*** The platform offers comprehensive tenant screening services, including credit checks to assess the reliability of potential tenants.
     - ***Risk Mitigation:*** By verifying tenant credentials, property owners can reduce the risk of non-payment and ensure they are renting to responsible individuals.
-    3. **Insurance Coverage**
+    3. #### Insurance Coverage
      **PayMyRent.gr** includes insurance coverage that protects against:
     - ***Unpaid Rent:*** Covers up to three months of unpaid rent.
     - ***Legal Fees:*** Covers legal costs associated with recovering unpaid rent.
@@ -54,7 +54,7 @@ if choice == "Presentation":
     # Market Opportunity
     st.write("""
     ### Market Opportunity
-    **Greece Rental Market Overview**
+    #### Greece Rental Market Overview
     - **Population:** 10,423,054
     - **Total Households:** 4,332,447
     - **Rental Households:** 1,299,176
